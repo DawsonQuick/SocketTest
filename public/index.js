@@ -6,6 +6,15 @@ var boundings = C.getBoundingClientRect();
 /** @type {CanvasRenderingContext2D} */
 const X = C.getContext("2d");
 
+ // Load an image from a URL
+ const img = new Image();
+ img.src = 'https://cutewallpaper.org/23/kali-linux-wallpaper-full-hd/51267842.jpg';
+
+ // Once the image is loaded, draw it on the canvas
+ img.onload = function() {
+  X.drawImage(img, 0, 0, C.width, C.height);
+ };
+
 //Player state variables
 isDrawing = false;
 toggleBeginning = false;
@@ -68,11 +77,6 @@ reqanf();
 C.addEventListener("mousedown", function(event) {
 
   isDrawing = true;
-
-  // Start Drawing
-  X.beginPath();
-  X.moveTo(event.clientX - boundings.left, event.clientY - boundings.top);
-
 });
 
 C.addEventListener("mousemove", function(e) {
@@ -96,12 +100,6 @@ C.addEventListener("mousemove", function(e) {
     code[0] = CMDS.move;
 
     let data = new Blob([code, buf]);
-    X.fillStyle = "#1f1f1f";
-    if(serverMove) X.moveTo(e.clientX - boundings.left, e.clientY - boundings.top);
-    X.lineTo(e.clientX - boundings.left, e.clientY - boundings.top);
-    X.strokeStyle = color;
-    X.stroke();
-    serverMove = false;
     socket.send(data);
   }
 });
@@ -133,8 +131,6 @@ colors.addEventListener('click', function(event) {
 
 var clear = document.getElementsByClassName('clear')[0];
 clear.addEventListener('click', function(event) {
-  //Clears the local instance of the canvas
-  X.clearRect(0, 0, C.width, C.height);
 
   //Creates a packet to send a clear command to the server
   let commandPacket = new Uint8Array(1);
@@ -189,11 +185,10 @@ function parsePacket(code, data) {
   switch (code) {
     case CMDS.clearCanvas: {
       X.clearRect(0, 0, C.width, C.height);
+      X.drawImage(img, 0, 0, C.width, C.height);
       break;
     }
     case CMDS.colorChange: {
-      console.log(data);
-      console.log("new color change", data[0]);
       let player = players.find(e => e.id == data[0]);
       let textDecoder = new TextDecoder();
       var data = data.slice(2);
@@ -228,10 +223,7 @@ function parsePacket(code, data) {
     }
 
     case CMDS.add: {
-      console.log(data);
-      console.log("new", data[0]);
-      const playerWithId = players.find(e => e.id == data[0]);
-
+    const playerWithId = players.find(e => e.id == data[0]);
     if (!playerWithId) {
       players.push(new Player(data[0]));
     }
@@ -240,7 +232,6 @@ function parsePacket(code, data) {
     }
 
     case CMDS.remove: {
-      console.log("remove", data[0]);
       let player = players.findIndex(e => e.id == data[0]);
       if (player < 0) {
         console.warn("Tried to remove non-existant player", data[0]);

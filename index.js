@@ -77,6 +77,9 @@ const intervalID = setInterval(function() {
        [connection.clientId]
       ).buffer
    );
+  //Creates the data of the color to be send to the server
+  let dataPacket = new TextEncoder();
+  dataPacket = dataPacket.encode(connection.data.color);
 
 let pmsg = Buffer.concat(
   [code_, clientId_,
@@ -93,7 +96,7 @@ wsSendAll(
 
 function wsSendAll(data, exclude) {
   for (const connection of ws.connections) {
-    if (connection === exclude) continue;
+    //if (connection === exclude) continue;
     connection.sendBuffer.push(data);
   }
 }
@@ -140,8 +143,6 @@ function parseData(client, clientId, msg) {
         ),
         msg_ = msg.slice(1, 1 + 4 * Uint16Array.BYTES_PER_ELEMENT);
 
-      code_[0] = 6;
-
       let pmsg = Buffer.concat(
         [code_, clientId_, msg_],
         code_.length + clientId_.length + msg_.length
@@ -163,8 +164,6 @@ function parseData(client, clientId, msg) {
           ).buffer
         ),
         msg_ = msg.slice(1, 1 + 4 * Uint16Array.BYTES_PER_ELEMENT);
-
-      code_[0] = 5;
 
       let pmsg = Buffer.concat(
         [code_, clientId_, msg_],
@@ -189,8 +188,6 @@ function parseData(client, clientId, msg) {
           ).buffer
         ),
         msg_ = msg.slice(1, 1 + 2 * Uint16Array.BYTES_PER_ELEMENT);
-
-      code_[0] = 4;
 
       let pmsg = Buffer.concat(
         [code_, clientId_, msg_],
@@ -218,8 +215,6 @@ function parseData(client, clientId, msg) {
         ),
         msg_ = msg.slice(1, 1 + 2 * Uint16Array.BYTES_PER_ELEMENT);
 
-      code_[0] = 3;
-
       let pmsg = Buffer.concat(
         [code_, clientId_, msg_],
         code_.length + clientId_.length + msg_.length
@@ -245,8 +240,6 @@ function parseData(client, clientId, msg) {
           ).buffer
         ),
         msg_ = msg.slice(1, 1 + 2 * Uint16Array.BYTES_PER_ELEMENT);
-
-      code_[0] = 0;
 
       let pmsg = Buffer.concat(
         [code_, clientId_, msg_],
